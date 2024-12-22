@@ -4,17 +4,8 @@ import path from "path";
 
 export default defineConfig({
   plugins: [vue()],
-  build: {
-    rollupOptions: {
-      external: ["@babylonjs/core"],
-    },
-  },
   resolve: {
     alias: {
-      "@babylonjs/core": path.resolve(
-        __dirname,
-        "node_modules/@babylonjs/core/esm/index.js"
-      ),
       "/assets": path.resolve(__dirname, "src/assets"),
     },
   },
@@ -27,5 +18,8 @@ export default defineConfig({
         secure: false,
       },
     },
+  },
+  optimizeDeps: {
+    include: ["@babylonjs/core", "@babylonjs/gui"],
   },
 });

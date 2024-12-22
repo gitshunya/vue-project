@@ -1,132 +1,71 @@
 <template>
-  <canvas ref="babylonCanvas" id="babylon-canvas" />
+  <canvas id="renderCanvas"></canvas>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, ref } from "vue";
+<script setup lang="ts">
+// Babylon.js のコア機能と GUI 機能をインポート
+import {
+  Engine,
+  Scene,
+  Vector3,
+  HemisphericLight,
+  MeshBuilder,
+  ArcRotateCamera,
+  Color3,
+} from "@babylonjs/core";
 import * as BABYLON from "@babylonjs/core";
+import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui";
+import { onMounted } from "vue";
 
-export default defineComponent({
-  name: "App",
-  setup() {
-    const babylonCanvas = ref<HTMLCanvasElement | null>(null);
-    const box = ref<BABYLON.Mesh | null>(null); // box を ref で保持
+onMounted(() => {
+  // Canvas 要素を取得
+  const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 
-    onMounted(() => {
-      if (!babylonCanvas.value) return;
+  // Babylon.js の Engine を作成
+  const engine = new Engine(canvas, true);
 
-      // 1. Babylon.jsエンジンの作成
-      const engine = new BABYLON.Engine(babylonCanvas.value, true);
+  // Babylon.js の Scene を作成
+  const scene = new Scene(engine);
 
-      // 2. シーンの作成
-      const scene = new BABYLON.Scene(engine);
+  // シーンの背景色を黒に設定
+  scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
 
-      // 3. カメラの作成と設定
-      const camera = new BABYLON.FreeCamera(
-        "camera1",
-        new BABYLON.Vector3(0, 5, -10),
-        scene
-      );
-      camera.setTarget(BABYLON.Vector3.Zero());
+  // カメラを作成 (ArcRotateCamera)
+  const camera = new ArcRotateCamera(
+    "camera",
+    -Math.PI / 2,
+    Math.PI / 2.5,
+    5,
+    new Vector3(0, 0, 0),
+    scene
+  );
+  camera.attachControl(canvas, true);
 
-      // 4. カメラの制御をアタッチ
-      camera.attachControl(babylonCanvas.value, true);
+  // ライトを作成 (HemisphericLight)
+  const light = new HemisphericLight(
+    "light",
+    new Vector3(0, 1, 0),
+    scene,
+    new Color3(1, 1, 1)
+  );
+  light.intensity = 1;
 
-      // 5. キーボードイベントの監視
-      scene.onKeyboardObservable.add((kbInfo) => {
-        if (!box.value) return; // box が null の場合は処理を中断
+  // オブジェクトを作成 (球体)
+  const sphere = MeshBuilder.CreateSphere("sphere", { diameter: 2 }, scene);
 
-        switch (kbInfo.type) {
-          case BABYLON.KeyboardEventTypes.KEYDOWN:
-            console.log("KEY DOWN: ", kbInfo.event.key);
-            switch (kbInfo.event.key) {
-              case "w":
-                box.value.position.z += 0.5;
-                break;
-              case "s":
-                box.value.position.z -= 0.5;
-                break;
-              case "a":
-                box.value.position.x -= 0.5;
-                break;
-              case "d":
-                box.value.position.x += 0.5;
-                break;
-            }
-            break;
-          case BABYLON.KeyboardEventTypes.KEYUP:
-            console.log("KEY UP: ", kbInfo.event.key);
-            break;
-        }
-      });
+  // GUI を作成 (AdvancedDynamicTexture)
+  const advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-      // 6. ライトの追加
-      const light = new BABYLON.HemisphericLight(
-        "light1",
-        new BABYLON.Vector3(0, 1, 0),
-        scene
-      );
-      light.intensity = 0.7;
+  // テキストを作成 (TextBlock)
+  const text1 = new TextBlock();
+  text1.text = "Hello world";
+  text1.color = "white";
+  text1.fontSize = 48;
+  advancedTexture.addControl(text1);
 
-      // 7. 立方体の追加
-      box.value = BABYLON.MeshBuilder.CreateBox("box", { size: 2 }, scene);
-
-      // 8. マテリアルの追加
-      const material = new BABYLON.StandardMaterial("boxMaterial", scene);
-      material.diffuseColor = new BABYLON.Color3(1, 0, 0); // 赤色
-      if (box.value) {
-        box.value.material = material;
-      }
-
-      // 9. WASDキーでカメラを移動
-      camera.keysUp.push(87); // W
-      camera.keysDown.push(83); // S
-      camera.keysLeft.push(65); // A
-      camera.keysRight.push(68); // D
-
-      // 10. 重力と衝突判定を調整
-      scene.gravity = new BABYLON.Vector3(0, 0, 0); // 重力を無効化
-      camera.checkCollisions = false; // カメラの衝突判定を無効化
-      if (box.value) {
-        box.value.checkCollisions = true; // 立方体の衝突判定を有効化
-      }
-
-      // 11. 地面を作成し、衝突判定を有効化
-      const ground = BABYLON.MeshBuilder.CreateGround(
-        "ground",
-        { width: 10, height: 10 },
-        scene
-      );
-      ground.checkCollisions = true;
-
-      // 12. テクスチャの追加
-      const texture = new BABYLON.Texture(
-        "https://i.imgur.com/v3u107j.png",
-        scene
-      );
-      material.diffuseTexture = texture;
-
-      // 13. カメラの移動速度を調整
-      camera.speed = 0.2;
-
-      // 14. レンダリングループの開始
-      engine.runRenderLoop(() => {
-        scene.render();
-      });
-    });
-
-    return { babylonCanvas, box };
-  },
+  // レンダリングループを設定
+  engine.runRenderLoop(() => {
+    scene.render();
+  });
 });
 </script>
-
-<style>
-body {
-  margin: 0;
-  overflow: hidden;
-}
-#babylon-canvas {
-  width: 100vw;
-  height: 100vh;
-}
-</style>
