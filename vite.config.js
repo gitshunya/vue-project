@@ -8,4 +8,9 @@ export default defineConfig({
       external: ["@babylonjs/core"],
     },
   },
+  resolve: {
+    alias: {
+      "@babylonjs/core": "/node_modules/@babylonjs/core/index.js",
+    },
+  },
 });
