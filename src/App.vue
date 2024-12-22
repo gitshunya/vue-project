@@ -12,9 +12,9 @@ import {
   MeshBuilder,
   ArcRotateCamera,
   Color3,
+  Color4,
 } from "@babylonjs/core";
-import * as BABYLON from "@babylonjs/core";
-import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui";
+import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui/2D";
 import { onMounted } from "vue";
 
 onMounted(() => {
@@ -28,17 +28,18 @@ onMounted(() => {
   const scene = new Scene(engine);
 
   // シーンの背景色を黒に設定
-  scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
+  scene.clearColor = new Color4(0, 0, 0, 1);
 
   // カメラを作成 (ArcRotateCamera)
   const camera = new ArcRotateCamera(
     "camera",
     -Math.PI / 2,
     Math.PI / 2.5,
-    5,
+    10,
     new Vector3(0, 0, 0),
     scene
   );
+  camera.fov = 0.8;
   camera.attachControl(canvas, true);
 
   // ライトを作成 (HemisphericLight)
@@ -51,7 +52,7 @@ onMounted(() => {
   light.intensity = 1;
 
   // オブジェクトを作成 (球体)
-  const sphere = MeshBuilder.CreateSphere("sphere", { diameter: 2 }, scene);
+  const sphere = MeshBuilder.CreateSphere("sphere", { diameter: 5 }, scene);
 
   // GUI を作成 (AdvancedDynamicTexture)
   const advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI("UI");
@@ -69,3 +70,16 @@ onMounted(() => {
   });
 });
 </script>
+
+<style scoped>
+body {
+  margin: 0;
+  padding: 0;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+</style>
