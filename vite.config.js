@@ -11,11 +11,21 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@babylonjs/core": "@babylonjs/core/esm",
-      "/assets": path.resolve(__dirname, "src/assets"), // アセットのパスをエイリアス
+      "@babylonjs/core": path.resolve(
+        __dirname,
+        "node_modules/@babylonjs/core/esm/index.js"
+      ),
+      "/assets": path.resolve(__dirname, "src/assets"),
     },
   },
   server: {
-    cors: true, // CORS を有効にする
+    cors: true,
+    proxy: {
+      "/cdn": {
+        target: "https://infird.com",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
 });
