@@ -1,0 +1,31 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to GitHub Pages # デプロイに関する記述（必要に応じて）
+        uses: peaceiris/actions-gh-pages@v3 # デプロイに関する記述（必要に応じて）
+        with: # デプロイに関する記述（必要に応じて）
+          github_token: ${{ secrets.GITHUB_TOKEN }} # デプロイに関する記述（必要に応じて）
+          publish_dir: ./dist # デプロイに関する記述（必要に応じて）
