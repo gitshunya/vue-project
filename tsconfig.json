@@ -11,6 +11,6 @@
     "lib": ["esnext", "dom"],
     "types": ["vite/client"]
   },
-  "include": ["src/**/*"],
+  "include": ["vite.config.js"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
