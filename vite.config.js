@@ -1,19 +1,29 @@
+// vite.config.js
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import { fileURLToPath, URL } from "node:url";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue()], // Vue.jsプラグインを使用
   resolve: {
     alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "@": "/src", // @ を /src へのエイリアスとして設定
     },
   },
   build: {
+    chunkSizeWarningLimit: 1600, // チャンクサイズの警告のしきい値を1600KBに設定
     rollupOptions: {
-      input: {
-        main: fileURLToPath(new URL("./src/main.ts", import.meta.url)),
+      output: {
+        manualChunks(id) {
+          // 手動でチャンクを分割する設定
+          if (id.includes("node_modules")) {
+            return id
+              .toString()
+              .split("node_modules/")[1]
+              .split("/")[0]
+              .toString();
+          }
+        },
       },
     },
   },
